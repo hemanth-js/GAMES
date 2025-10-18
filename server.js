@@ -1,6 +1,12 @@
 // Simple Bingo multiplayer WebSocket server with turn-based gameplay
 import { WebSocketServer, WebSocket } from "ws";
 import http from "http";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const rooms = new Map();
 
@@ -9,6 +15,30 @@ const rooms = new Map();
 async function createWSS(startPort = 8080, maxAttempts = 10) {
   for (let p = startPort; p < startPort + maxAttempts; p++) {
     const server = http.createServer();
+
+    // Serve static files for the bingo game
+    server.on('request', (req, res) => {
+      const url = req.url === '/' ? '/bingo.html' : req.url;
+      const filePath = path.join(__dirname, url);
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.writeHead(404);
+          res.end('File not found');
+          return;
+        }
+
+        // Set content type based on file extension
+        const ext = path.extname(filePath);
+        let contentType = 'text/plain';
+        if (ext === '.html') contentType = 'text/html';
+        else if (ext === '.css') contentType = 'text/css';
+        else if (ext === '.js') contentType = 'application/javascript';
+
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(data);
+      });
+    });
 
     try {
       await new Promise((resolve, reject) => {
@@ -23,7 +53,7 @@ async function createWSS(startPort = 8080, maxAttempts = 10) {
           resolve();
         });
 
-        server.listen(p);
+        server.listen(p, '0.0.0.0');
       });
 
       // now that server is listening, attach WebSocketServer
@@ -46,14 +76,14 @@ async function createWSS(startPort = 8080, maxAttempts = 10) {
 function broadcast(roomId, data, sender = null) {
   const room = rooms.get(roomId);
   if (!room) return;
-  
+
   for (const clientObj of room.players) {
     const client = clientObj.ws;
     // skip closed clients
     if (!client || client.readyState !== WebSocket.OPEN) continue;
     // optionally skip the sender
     if (sender && client === sender) continue;
-    
+
     try {
       client.send(JSON.stringify(data));
     } catch (err) {
@@ -65,14 +95,14 @@ function broadcast(roomId, data, sender = null) {
 function getNextPlayer(roomId) {
   const room = rooms.get(roomId);
   if (!room || !room.players.length) return null;
-  
+
   const currentIndex = room.players.findIndex(p => p.player === room.currentTurn);
   const nextIndex = (currentIndex + 1) % room.players.length;
   return room.players[nextIndex].player;
 }
 
 const preferredPort = process.env.PORT ? Number(process.env.PORT) : 8080;
-const { wss, server, port } = await createWSS(preferredPort, 20);
+const { wss, server: httpServer, port } = await createWSS(preferredPort, 20);
 
 wss.on("connection", (ws) => {
   let roomId = null;
@@ -292,4 +322,5 @@ wss.on("connection", (ws) => {
 });
 
 console.log(`✅ WebSocket server running at ws://localhost:${port}`);
+console.log(`🌐 HTTP server serving static files at http://localhost:${port}`);
 console.log(`Ready for turn-based Bingo!`);

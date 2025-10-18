@@ -27,6 +27,7 @@ let gameStarted = false;
 let winner = null;
 let currentTurn = null;
 let myTurn = false;
+let selectedNumber = null; // Number selected to call
 playerInput.value = playerName;
 
 // 🎲 Generate 1–25
@@ -82,6 +83,49 @@ function renderBoard() {
       };
       boardDiv.appendChild(cell);
     });
+  });
+}
+
+// Render available numbers for selection
+function renderAvailableNumbers() {
+  const container = document.getElementById('availableNumbers');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!gameStarted || winner) {
+    container.innerHTML = '<div style="opacity: 0.5; text-align: center;">Game not active</div>';
+    return;
+  }
+  
+  const all = Array.from({ length: 25 }, (_, i) => i + 1);
+  const available = all.filter((n) => !called.includes(n));
+  
+  if (available.length === 0) {
+    container.innerHTML = '<div style="opacity: 0.5; text-align: center;">All numbers called</div>';
+    return;
+  }
+  
+  available.forEach(num => {
+    const numBtn = document.createElement('div');
+    numBtn.className = 'number-btn';
+    numBtn.textContent = num;
+    
+    if (selectedNumber === num) {
+      numBtn.classList.add('selected');
+    }
+    
+    numBtn.onclick = () => {
+      if (!myTurn && !local) {
+        addChat('System', `It's ${currentTurn}'s turn!`);
+        return;
+      }
+      selectedNumber = num;
+      renderAvailableNumbers();
+      addChat('System', `Number ${num} selected. Click "Call Number" to confirm.`);
+    };
+    
+    container.appendChild(numBtn);
   });
 }
 
@@ -170,54 +214,41 @@ function checkAndAnnounceWin() {
   }
 }
 
-function showNumberSelector() {
+function callSelectedNumber() {
   if (!gameStarted || winner) {
     addChat('System', 'Game not started or already won!');
     return;
   }
   
-  if (!myTurn && connected) {
-    addChat('System', `It's ${currentTurn}'s turn!`);
+  if (!myTurn && connected && !local) {
+    addChat('System', `It's ${currentTurn}'s turn, not yours!`);
     return;
   }
   
-  const all = Array.from({ length: 25 }, (_, i) => i + 1);
-  const available = all.filter((n) => !called.includes(n));
-  
-  if (available.length === 0) {
-    addChat('System', 'All numbers have been called!');
+  if (!selectedNumber) {
+    addChat('System', 'Please select a number first by clicking on it!');
     return;
   }
   
-  // Create a prompt with available numbers
-  const numberStr = available.join(', ');
-  const selected = prompt(`Your turn to call a number!\n\nAvailable numbers:\n${numberStr}\n\nEnter a number:`);
-  
-  if (selected === null) return; // Cancelled
-  
-  const num = parseInt(selected);
-  
-  if (!available.includes(num)) {
-    alert('Invalid number! Please select an available number.');
+  if (called.includes(selectedNumber)) {
+    addChat('System', `Number ${selectedNumber} already called!`);
+    selectedNumber = null;
+    renderAvailableNumbers();
     return;
   }
   
-  callSpecificNumber(num);
-}
-
-function callSpecificNumber(num) {
-  if (called.includes(num)) {
-    addChat('System', `Number ${num} already called!`);
-    return;
-  }
-  
+  const num = selectedNumber;
   called.push(num);
   autoMarkCalled();
   renderCalled();
   renderBoard();
+  renderAvailableNumbers();
   checkAndAnnounceWin();
   
   addChat(playerName, `Called number: ${num}`);
+  
+  // Reset selection
+  selectedNumber = null;
   
   if (ws && connected) {
     ws.send(JSON.stringify({ 
@@ -244,20 +275,37 @@ function renderCalled() {
 }
 
 function updateTurnDisplay() {
-  if (!gameStarted || winner) return;
+  if (!gameStarted || winner) {
+    announcement.textContent = 'Waiting...';
+    renderAvailableNumbers();
+    return;
+  }
+  
+  console.log('updateTurnDisplay - currentTurn:', currentTurn, 'playerName:', playerName);
   
   if (local) {
-    announcement.textContent = 'Your turn! Click "Call Number"';
+    announcement.textContent = 'Your turn! Select a number and click "Call Number"';
     myTurn = true;
   } else if (currentTurn === playerName) {
-    announcement.textContent = '🎯 YOUR TURN! Click "Call Number"';
+    announcement.textContent = '🎯 YOUR TURN! Select a number and click "Call Number"';
     announcement.style.color = '#00ff9d';
+    announcement.style.fontSize = '1.2rem';
     myTurn = true;
-  } else {
+  } else if (currentTurn) {
     announcement.textContent = `Waiting for ${currentTurn} to call...`;
     announcement.style.color = '#ff6cff';
+    announcement.style.fontSize = '1rem';
+    myTurn = false;
+    selectedNumber = null; // Clear selection when not your turn
+  } else {
+    announcement.textContent = 'Waiting for game to start...';
+    announcement.style.color = '#f0f0f0';
+    announcement.style.fontSize = '1rem';
     myTurn = false;
   }
+  
+  renderAvailableNumbers();
+  renderPlayers();
 }
 
 function resetGame() {
@@ -268,8 +316,10 @@ function resetGame() {
   winner = null;
   currentTurn = null;
   myTurn = false;
+  selectedNumber = null;
   renderBoard();
   renderCalled();
+  renderAvailableNumbers();
   announcement.textContent = 'Waiting...';
   announcement.style.color = '#f0f0f0';
   announcement.style.fontSize = '1rem';
@@ -339,6 +389,7 @@ joinBtn.onclick = () => {
         card = genCard();
         marked = Array(5).fill(0).map(() => Array(5).fill(false));
         currentTurn = msg.firstPlayer;
+        selectedNumber = null;
         
         console.log('Game started! First player:', currentTurn);
         console.log('My name:', playerName);
@@ -377,15 +428,18 @@ joinBtn.onclick = () => {
         
         addChat('System', `🏆 ${msg.player} won with ${msg.lines ? msg.lines.length : 5} lines!`);
         renderPlayers();
+        renderAvailableNumbers();
       } else if (msg.type === 'reset') {
         called = [];
         gameStarted = false;
         winner = null;
         currentTurn = null;
         myTurn = false;
+        selectedNumber = null;
         marked = Array(5).fill(0).map(() => Array(5).fill(false));
         renderCalled();
         renderBoard();
+        renderAvailableNumbers();
         announcement.textContent = 'Game reset - waiting...';
         announcement.style.color = '#f0f0f0';
         announcement.style.fontSize = '1rem';
@@ -435,8 +489,9 @@ localBtn.onclick = () => {
     addChat('System', 'Local mode enabled');
     gameStarted = true;
     resetGame();
-    announcement.textContent = 'Your turn! Click "Call Number"';
+    announcement.textContent = 'Your turn! Select a number and click "Call Number"';
     myTurn = true;
+    renderAvailableNumbers();
   } else {
     statusEl.textContent = 'Status: Disconnected';
     roomDisplay.textContent = '';
@@ -456,15 +511,16 @@ startBtn.onclick = () => {
   } else if (local) {
     gameStarted = true;
     resetGame();
-    announcement.textContent = 'Your turn! Click "Call Number"';
+    announcement.textContent = 'Your turn! Select a number and click "Call Number"';
     myTurn = true;
+    renderAvailableNumbers();
     addChat('System', 'Game started in local mode');
   } else {
     addChat('System', 'Please connect to a server or enable local mode first');
   }
 };
 
-callBtn.onclick = showNumberSelector;
+callBtn.onclick = callSelectedNumber;
 resetBtn.onclick = resetGame;
 
 sendChat.onclick = () => {

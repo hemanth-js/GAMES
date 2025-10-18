@@ -17,7 +17,7 @@
       <input id="roomId" type="text" value="lobby">
 
       <label>WebSocket URL</label>
-      <input id="wsUrl" type="text" value="ws://ethnographic-jett-quotidianly.ngrok-free.dev">
+      <input id="wsUrl" type="text" value="wss://ethnographic-jett-quotidianly.ngrok-free.dev">
 
       <label>Number of Players</label>
       <select id="numPlayers">
@@ -59,6 +59,11 @@
       <section class="announcement">
         <h3>Announcement</h3>
         <div id="announcement">Waiting...</div>
+      </section>
+
+      <section class="available-section">
+        <h3>Available Numbers (Click to Select)</h3>
+        <div id="availableNumbers" class="available-numbers"></div>
       </section>
 
       <section class="board" id="bingoBoard"></section>

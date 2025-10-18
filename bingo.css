@@ -113,6 +113,55 @@ header {
   font-weight: bold;
 }
 
+/* Available Numbers Section */
+.available-section {
+  margin-top: 15px;
+}
+
+.available-numbers {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.number-btn {
+  aspect-ratio: 1;
+  background: rgba(138, 43, 226, 0.3);
+  border: 2px solid rgba(138, 43, 226, 0.5);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #fff;
+}
+
+.number-btn:hover {
+  background: rgba(138, 43, 226, 0.6);
+  border-color: #8a2be2;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #8a2be2;
+}
+
+.number-btn.selected {
+  background: #00ff9d;
+  border-color: #00ff9d;
+  color: #000;
+  box-shadow: 0 0 20px #00ff9d;
+  animation: pulse-green 1s infinite alternate;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 10px #00ff9d; }
+  100% { box-shadow: 0 0 25px #00ff9d; }
+}
+
 .chat-box {
   height: 250px;
   overflow-y: auto;
@@ -130,6 +179,7 @@ header {
   gap: 5px;
   margin-top: 10px;
 }
+
 /* Glow for last called number in the called list */
 .last-called {
   color: #0ff;
