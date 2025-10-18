@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuristic Bingo</title>
+  <link rel="stylesheet" href="bingo.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Neon Lobby</h2>
+      <label>Player Name</label>
+      <input id="playerName" type="text" value="Player-1234">
+      
+      <label>Room ID</label>
+      <input id="roomId" type="text" value="lobby">
+
+      <label>WebSocket URL</label>
+      <input id="wsUrl" type="text" value="ws://ethnographic-jett-quotidianly.ngrok-free.dev">
+
+      <label>Number of Players</label>
+      <select id="numPlayers">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4" selected>4</option>
+      </select>
+
+      <div class="buttons">
+        <button id="joinBtn">Join</button>
+        <button id="localBtn">Local Mode</button>
+      </div>
+
+      <div class="player-list">
+        <h3>Players</h3>
+        <ul id="players"></ul>
+      </div>
+
+      <div class="controls">
+        <h3>Controls</h3>
+        <button id="startBtn">Start Game</button>
+        <button id="callBtn">Call Number</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <h1>FUTURE BINGO</h1>
+        <span id="roomDisplay"></span>
+      </header>
+
+      <section class="called">
+        <h3>Called Numbers</h3>
+        <div id="calledNumbers" class="called-numbers"></div>
+      </section>
+
+      <section class="announcement">
+        <h3>Announcement</h3>
+        <div id="announcement">Waiting...</div>
+      </section>
+
+      <section class="board" id="bingoBoard"></section>
+    </main>
+
+    <aside class="chat">
+      <h3>Chat</h3>
+      <div id="chatBox" class="chat-box"></div>
+      <div class="chat-input">
+        <input id="chatInput" placeholder="Say hi...">
+        <button id="sendChat">Send</button>
+      </div>
+      <p id="status">Status: Disconnected</p>
+    </aside>
+  </div>
+
+  <script src="bingo.js"></script>
+</body>
+</html>
