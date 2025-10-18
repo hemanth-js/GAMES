@@ -1,0 +1,156 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top left, #2b005c, #000);
+  color: #f0f0f0;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 250px 1fr 250px;
+  gap: 15px;
+  height: 100vh;
+  padding: 15px;
+}
+
+aside, main {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 15px;
+  padding: 15px;
+  overflow: auto;
+}
+
+.sidebar h2, .chat h3 {
+  color: #ff6cff;
+  text-align: center;
+}
+
+input, button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+input {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+button {
+  background: linear-gradient(90deg, #8a2be2, #ff00ff);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.player-list, .controls {
+  margin-top: 15px;
+}
+
+.player-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.player-list li {
+  background: rgba(255,255,255,0.1);
+  margin: 3px 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 15px;
+}
+
+.cell {
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cell.marked {
+  background: #00ff9d;
+  color: black;
+  box-shadow: 0 0 15px #00ff9d;
+}
+
+.called-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.called-numbers div {
+  background: rgba(255,255,255,0.1);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.chat-box {
+  height: 250px;
+  overflow-y: auto;
+  background: rgba(255,255,255,0.05);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.chat-box .msg {
+  margin-bottom: 8px;
+}
+
+.chat-input {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+/* Glow for last called number in the called list */
+.last-called {
+  color: #0ff;
+  font-weight: bold;
+  animation: pulse 1s infinite alternate;
+  border: 2px solid #0ff;
+  border-radius: 6px;
+  padding: 2px 4px;
+  box-shadow: 0 0 10px #0ff;
+}
+
+/* Glow on the Bingo board */
+.highlighted {
+  background-color: rgba(0, 255, 255, 0.15);
+  border-color: #0ff;
+  box-shadow: 0 0 12px #0ff;
+  animation: pulse 1s infinite alternate;
+}
+
+/* Neon pulsing animation */
+@keyframes pulse {
+  0% { box-shadow: 0 0 4px #0ff; }
+  100% { box-shadow: 0 0 18px #0ff; }
+}
