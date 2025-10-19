@@ -1,6 +1,4 @@
-import { WebSocket } from 'ws';
-
-const ws = new WebSocket('ws://localhost:8080');
+import { ws } from './bingo';
 
 ws.on('open', () => {
   console.log('Connected to server');

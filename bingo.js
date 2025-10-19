@@ -115,15 +115,39 @@ function renderAvailableNumbers() {
       numBtn.classList.add('selected');
     }
     
-    numBtn.onclick = () => {
-      if (!myTurn && !local) {
-        addChat('System', `It's ${currentTurn}'s turn!`);
-        return;
-      }
-      selectedNumber = num;
-      renderAvailableNumbers();
-      addChat('System', `Number ${num} selected. Click "Call Number" to confirm.`);
-    };
+    // Disable if not your turn
+    if (!myTurn && !local) {
+      numBtn.style.opacity = '0.3';
+      numBtn.style.cursor = 'not-allowed';
+      numBtn.onclick = () => {
+        addChat('System', `It's ${currentTurn}'s turn, not yours!`);
+      };
+    } else {
+      numBtn.onclick = () => {
+        if (called.includes(num)) {
+          addChat('System', `Number ${num} already called!`);
+          return;
+        }
+        
+        // Immediately call the number
+        called.push(num);
+        autoMarkCalled();
+        renderCalled();
+        renderBoard();
+        renderAvailableNumbers();
+        checkAndAnnounceWin();
+        
+        addChat(playerName, `Called number: ${num}`);
+        
+        if (ws && connected) {
+          ws.send(JSON.stringify({ 
+            type: 'call', 
+            number: num,
+            caller: playerName
+          }));
+        }
+      };
+    }
     
     container.appendChild(numBtn);
   });
